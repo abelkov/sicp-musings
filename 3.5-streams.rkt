@@ -108,15 +108,15 @@
   (display x))
 
 ; ex 3.50
-;(define (stream-map proc . argstreams)
-;  (if (⟨??⟩ (car argstreams))
-;      the-empty-stream
-;      (⟨??⟩
-;       (apply proc (map ⟨??⟩ argstreams))
-;       (apply stream-map
-;              (cons proc 
-;                    (map ⟨??⟩ 
-;                         argstreams))))))
+(define (stream-map proc . argstreams)
+  (if (stream-null? (car argstreams))
+      empty-stream
+      (cons-stream
+       (apply proc (map stream-car argstreams))
+       (apply stream-map
+              (cons proc 
+                    (map stream-cdr
+                         argstreams))))))
 
 (define (my-map proc . args)
   (define (my-inner-map proc args)
@@ -139,3 +139,11 @@
      (list 1 2 3) 
      (list 40 50 60) 
      (list 700 800 900))
+
+(define stream1 (stream-enumerate-interval 1 10))
+(define stream2 (stream-enumerate-interval 11 110))
+
+(display-stream
+ (stream-map +
+             stream1
+             stream2))
