@@ -47,9 +47,14 @@
 
 ; stream implementation
 
-(define the-empty-stream null)
+(define empty-stream null)
 
 (define stream-null? null?)
+
+(define (stream? s)
+  (cond [(not (pair? s)) #f]
+        [(stream-null? s) #t]
+        [#t (stream? (stream-cdr s))]))
 
 (define (stream-car stream) 
   (car stream))
@@ -71,15 +76,8 @@
       (stream-car s)
       (stream-ref (stream-cdr s) (- n 1))))
 
-(define (stream-map proc s)
-  (if (stream-null? s)
-      the-empty-stream
-      (cons-stream 
-       (proc (stream-car s))
-       (stream-map proc (stream-cdr s)))))
-
 (define (stream-filter pred s)
-  (cond [(stream-null? s) the-empty-stream]
+  (cond [(stream-null? s) empty-stream]
         [(pred (stream-car s))
          (cons-stream (stream-car s)
                        (stream-filter pred (stream-cdr s)))]
@@ -95,7 +93,7 @@
 
 (define (stream-enumerate-interval a b)
   (if (> a b)
-      the-empty-stream
+      empty-stream
       (cons-stream a (stream-enumerate-interval (+ a 1) b))))
 
 
@@ -132,6 +130,10 @@
             (rests (my-inner-map cdr args))]
         (cons (apply proc firsts)
               (apply my-map proc rests)))))
+
+
+
+; tests
 
 (my-map + 
      (list 1 2 3) 
