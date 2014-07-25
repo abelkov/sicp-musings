@@ -107,6 +107,8 @@
   (newline)
   (display x))
 
+
+
 ; ex 3.50
 (define (stream-map proc . argstreams)
   (if (stream-null? (car argstreams))
@@ -130,6 +132,46 @@
             (rests (my-inner-map cdr args))]
         (cons (apply proc firsts)
               (apply my-map proc rests)))))
+
+
+
+; ex 3.51
+(define (show x)
+  (display-line x)
+  x)
+
+(define x 
+  (stream-map 
+   show 
+   (stream-enumerate-interval 0 10)))
+
+(stream-ref x 5)
+(stream-ref x 7)
+
+
+
+; ex 3.52
+
+(define sum 0)
+
+(define (accum x)
+  (set! sum (+ x sum))
+  sum)
+
+(define seq 
+  (stream-map 
+   accum 
+   (stream-enumerate-interval 1 20)))
+
+(define y (stream-filter even? seq))
+
+(define z 
+  (stream-filter 
+   (lambda (x) 
+     (= (remainder x 5) 0)) seq))
+
+(stream-ref y 7)
+(display-stream z)
 
 
 
