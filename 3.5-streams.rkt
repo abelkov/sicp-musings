@@ -145,8 +145,8 @@
    show 
    (stream-enumerate-interval 0 10)))
 
-(stream-ref x 5)
-(stream-ref x 7)
+;(stream-ref x 5)
+;(stream-ref x 7)
 
 
 
@@ -170,22 +170,25 @@
    (lambda (x) 
      (= (remainder x 5) 0)) seq))
 
-(stream-ref y 7)
-(display-stream z)
+;(stream-ref y 7)
+;(display-stream z)
+
+
+
 
 
 
 ; tests
 
-(my-map + 
-     (list 1 2 3) 
-     (list 40 50 60) 
-     (list 700 800 900))
+;(my-map + 
+;     (list 1 2 3) 
+;     (list 40 50 60) 
+;     (list 700 800 900))
 
 (define stream1 (stream-enumerate-interval 1 10))
 (define stream2 (stream-enumerate-interval 11 110))
 
-(display-stream
- (stream-map +
-             stream1
-             stream2))
+;(display-stream
+; (stream-map +
+;             stream1
+;             stream2))
