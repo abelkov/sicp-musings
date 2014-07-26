@@ -1,34 +1,53 @@
 #lang racket
 
 
-(define (evalS exp env)
-  (cond [(self-evaluatingS? exp) exp]
-        ((variableS? exp) 
+(define (Eval exp env)
+  (cond [(Self-evaluating? exp) exp]
+        ((Variable? exp) 
          (lookup-variable-value exp env))
-        ((quotedS? exp) 
-         (quotedS-text exp))
-        ((assignmentS? exp) 
+        ((Quoted? exp) 
+         (Quoted-text exp))
+        ((Assignment? exp) 
          (eval-assignment exp env))
-        ((definitionS? exp) 
+        ((Definition? exp) 
          (eval-definition exp env))
-        ((ifS? exp) 
+        ((If? exp) 
          (eval-if exp env))
-        ((lambdaS? exp)
+        ((Lambda? exp)
          (make-procedure 
-          (lambdaS-parameters exp)
-          (lambdaS-body exp)
+          (Lambda-parameters exp)
+          (Lambda-body exp)
           env))
-        ((beginS? exp)
+        ((Begin? exp)
          (eval-sequence 
-          (beginS-actions exp) 
+          (Begin-actions exp) 
           env))
-        ((condS? exp) 
-         (evalS (cond->if exp) env))
-        ((applicationS? exp)
-         (applyS (evalS (applicationS-operator exp) env)
+        ((Cond? exp) 
+         (Eval (cond->if exp) env))
+        ((Application? exp)
+         (Apply (Eval (Application-operator exp) env)
                 (list-of-values 
-                 (applicationS-operands exp) 
+                 (Application-operands exp) 
                  env)))
         (else
          (error "Unknown expression 
-                 type: evalS" exp))))
+                 type: Eval" exp))))
+
+(define (Apply procedure arguments)
+  (cond ((primitive-procedure? procedure)
+         (apply-primitive-procedure 
+          procedure 
+          arguments))
+        ((compound-procedure? procedure)
+         (eval-sequence
+           (Procedure-body procedure)
+           (extend-environment
+             (Procedure-parameters 
+              procedure)
+             arguments
+             (Procedure-environment 
+              procedure))))
+        (else
+         (error "Unknown procedure 
+                 type: Apply" 
+                procedure))))
