@@ -1,4 +1,4 @@
 sicp-musings
 ============
 
-Goofing around in Structure and Interpretation of Computer Programs
+Just doing my Structure and Interpretation of Computer Programs
