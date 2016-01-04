@@ -1,0 +1,21 @@
+Prove by induction:
+Fib(n) = (phi^n - psi^n) / sqrt(5)
+
+Base cases:
+Fib(0) = (phi^0 - psi^0) / sqrt(5) = 0
+Fib(1) = (phi^1 - psi^1) / sqrt(5) = 1
+
+Inductive steps:
+Fib(k-1) = (phi^(k-1) - psi^(k-1)) / sqrt(5)
+Fib(k) = (phi^k - psi^k) / sqrt(5)
+
+Prove:
+Fib(k+1) = (phi^(k+1) - psi^(k+1)) / sqrt(5)
+
+Fib(k+1)
+  = Fib(k) + Fib(k-1)
+  = (phi^k - psi^k) / sqrt(5) + (phi^(k-1) - psi^(k-1)) / sqrt(5)
+  = ... arithmetic ...
+  = (phi^(k+1) - psi^(k+1)) / sqrt(5)
+
+QED
