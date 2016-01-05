@@ -1,6 +1,8 @@
 #lang racket
 (require racket/trace)
 
+(define (square x) (* x x))
+
 ; 1.2.1 Linear Recursion and Iteration
 
 (define (factorial n)
@@ -63,3 +65,37 @@
 
 ; 1.2.4 Exponentiation
 
+; linear recursive
+;(define (expt b n)
+;  (if (= n 0) 
+;      1 
+;      (* b (expt b (- n 1)))))
+
+; linear iterative
+(define (expt b n) 
+  (expt-iter b n 1))
+
+(define (expt-iter b counter product)
+  (if (= counter 0)
+      product
+      (expt-iter b
+                 (- counter 1)
+                 (* b product))))
+
+; fast
+(define (fast-expt b n)
+  (cond ((= n 0) 
+         1)
+        ((even? n) 
+         (square (fast-expt b (/ n 2))))
+        (else 
+         (* b (fast-expt b (- n 1))))))
+
+; 1.2.5 Greatest Common Divisors
+
+(define (gcd a b)
+  (if (= b 0)
+      a
+      (gcd b (remainder a b))))
+
+; 1.2.6 Example: Testing for Primality

@@ -1,0 +1,2 @@
+; applicative-order: 5 times (for b)
+; normal-order: 1 + 2 + 3 + 4 (for b) + 3 (for a) = 13 times
