@@ -1,0 +1,3 @@
+; louis is halving the exponent at each step,
+; but he splits one call into two, so in the end we just make n calls
+; instead of log(n)
