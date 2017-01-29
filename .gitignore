@@ -3,3 +3,5 @@ compiled/*
 *.rkt#*
 *.pdf
 *.txt~
+original-code/
+.idea
