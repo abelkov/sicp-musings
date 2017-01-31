@@ -8,12 +8,9 @@
 ;;;; the two commented-out lines at the end of the file (setting up the
 ;;;; global environment and starting the driver loop).
 
-;;;;**WARNING: Don't load this file twice (or you'll lose the primitives
-;;;;  interface, due to renamings of apply).
-
-;;;from section 4.1.4 -- must precede def of metacircular apply
 #lang sicp
-(define apply-in-underlying-scheme apply)
+(#%require (only racket/base error))
+(#%require (only typed/racket/base assert))
 
 ;;;SECTION 4.1.1
 
@@ -31,22 +28,23 @@
         ((begin? exp) 
          (eval-sequence (begin-actions exp) env))
         ((cond? exp) (eval (cond->if exp) env))
+        ((let? exp) (eval (let->combination exp) env))
         ((application? exp)
-         (apply (eval (operator exp) env)
-                (list-of-values (operands exp) env)))
+         (s-apply (eval (operator exp) env)
+                  (list-of-values (operands exp) env)))
         (else
          (error "Unknown expression type -- EVAL" exp))))
 
-(define (apply procedure arguments)
+(define (s-apply procedure arguments)
   (cond ((primitive-procedure? procedure)
          (apply-primitive-procedure procedure arguments))
         ((compound-procedure? procedure)
          (eval-sequence
-           (procedure-body procedure)
-           (extend-environment
-             (procedure-parameters procedure)
-             arguments
-             (procedure-environment procedure))))
+          (procedure-body procedure)
+          (extend-environment
+           (procedure-parameters procedure)
+           arguments
+           (procedure-environment procedure))))
         (else
          (error
           "Unknown procedure type -- APPLY" procedure))))
@@ -76,11 +74,36 @@
 
 (define (eval-definition exp env)
   (define-variable! (definition-variable exp)
-                    (eval (definition-value exp) env)
-                    env)
+    (eval (definition-value exp) env)
+    env)
   'ok)
 
 ;;;SECTION 4.1.2
+
+(define (let? exp)
+  (tagged-list? exp 'let))
+
+(define (let-bindings exp)
+  (cadr exp))
+
+(define (let-vars exp)
+  (map (lambda (pair) (car pair))
+       (let-bindings exp)))
+
+(define (let-vals exp)
+  (map (lambda (pair) (cadr pair))
+       (let-bindings exp)))
+
+(define (let-body exp)
+  (cddr exp))
+
+(define (let->combination exp)
+  (cons (make-lambda
+         (let-vars exp)
+         (let-body exp))
+        (let-vals exp)))
+
+
 
 (define (self-evaluating? exp)
   (cond ((number? exp) true)
@@ -294,8 +317,6 @@
     (define-variable! 'false false initial-env)
     initial-env))
 
-;[do later] (define the-global-environment (setup-environment))
-
 (define (primitive-procedure? proc)
   (tagged-list? proc 'primitive))
 
@@ -306,7 +327,9 @@
         (list 'cdr cdr)
         (list 'cons cons)
         (list 'null? null?)
-;;      more primitives
+        (list '+ +)
+        (list '* *)
+        ;;      more primitives
         ))
 
 (define (primitive-procedure-names)
@@ -317,30 +340,9 @@
   (map (lambda (proc) (list 'primitive (cadr proc)))
        primitive-procedures))
 
-;[moved to start of file] (define apply-in-underlying-scheme apply)
-
 (define (apply-primitive-procedure proc args)
-  (apply-in-underlying-scheme
-   (primitive-implementation proc) args))
+  (apply (primitive-implementation proc) args))
 
-
-
-(define input-prompt ";;; M-Eval input:")
-(define output-prompt ";;; M-Eval value:")
-
-(define (driver-loop)
-  (prompt-for-input input-prompt)
-  (let ((input (read)))
-    (let ((output (eval input the-global-environment)))
-      (announce-output output-prompt)
-      (user-print output)))
-  (driver-loop))
-
-(define (prompt-for-input string)
-  (newline) (newline) (display string) (newline))
-
-(define (announce-output string)
-  (newline) (display string) (newline))
 
 (define (user-print object)
   (if (compound-procedure? object)
@@ -348,11 +350,30 @@
                      (procedure-parameters object)
                      (procedure-body object)
                      '<procedure-env>))
-      (display object)))
+      (display object))
+  (newline))
 
-;;;Following are commented out so as not to be evaluated when
-;;; the file is loaded.
-;;(define the-global-environment (setup-environment))
-;;(driver-loop)
+(define e (setup-environment))
 
-'METACIRCULAR-EVALUATOR-LOADED
+;; tests
+(define test-exp '(let ((x 2) (y 3))
+                    (+ x y)))
+
+(define test-multibody-exp '(let ((x 2) (y 3))
+                    (+ x y) (* y x)))
+
+(assert (equal?
+         (let-vars test-exp)
+         '(x y)))
+
+(assert (equal?
+         (let-vals test-exp)
+         '(2 3)))
+
+(assert (eq?
+         (eval test-exp e)
+         5))
+
+(assert (eq?
+         (eval test-multibody-exp e)
+         6))
